@@ -10,6 +10,7 @@ public class TripsService : ITripsService
     public async Task<bool> DoesTripExist(int id)
     {
         await using var conn = new SqlConnection(ConnectionString);
+        // Checks if a trip with the given ID exists.
         await using var cmd = new SqlCommand("SELECT 1 FROM Trip WHERE IdTrip = @Id", conn);
         cmd.Parameters.AddWithValue("@Id", id);
 
@@ -22,6 +23,7 @@ public class TripsService : ITripsService
     public async Task<bool> IsTripAvailable(int id)
     {
         await using var conn = new SqlConnection(ConnectionString);
+        // Retrieves the number of participants and max capacity for a trip.
         await using var cmd = new SqlCommand("SELECT COUNT(*) AS PARTICIPANTS, MaxPeople FROM Trip JOIN Client_Trip ON Trip.IdTrip = Client_Trip.IdTrip WHERE Trip.IdTrip = @Id GROUP BY MaxPeople", conn);
         cmd.Parameters.AddWithValue("@Id", id);
 
@@ -40,6 +42,7 @@ public class TripsService : ITripsService
     public async Task<bool> DoesClientExist(int id)
     {
         await using var conn = new SqlConnection(ConnectionString);
+        // Checks if a client exists by ID.
         await using var cmd = new SqlCommand("SELECT 1 FROM Client WHERE IdClient = @Id", conn);
         cmd.Parameters.AddWithValue("@Id", id);
 
@@ -51,6 +54,8 @@ public class TripsService : ITripsService
 
     public async Task<bool> IsEmpty(int id)
     {
+        // Checks max capacity of a trip.
+        
         await using var conn = new SqlConnection(ConnectionString);
         await using var cmd = new SqlCommand("SELECT MaxPeople FROM Trip WHERE IdTrip = @Id", conn);
         cmd.Parameters.AddWithValue("@Id", id);
@@ -63,6 +68,7 @@ public class TripsService : ITripsService
 
     private async Task<List<CountryDTO>> GetCountries(int tripId)
     {
+        // Retrieves countries associated with a given trip.
         var countryCommand = """
                                 SELECT Country.IdCountry, Country.Name
                                 FROM Country_Trip JOIN Country ON Country_Trip.IdCountry = Country.IdCountry
@@ -98,6 +104,7 @@ public class TripsService : ITripsService
         }
 
         var clientTrips = new List<ClientTripDTO>();
+        // Retrieves all trips a specific client is registered for
         var command = "SELECT * FROM Trip JOIN Client_Trip ON Trip.IdTrip = Client_Trip.IdTrip WHERE IdClient = @idClient";
 
         await using (var conn = new SqlConnection(ConnectionString))
@@ -144,6 +151,7 @@ public class TripsService : ITripsService
         }
         
         var trips = new List<TripDTO>();
+        // Retrieves either all trips or a specific trip based on ID.
         var command = id == -1 ? "SELECT * FROM Trip" : "SELECT * FROM Trip WHERE IdTrip = @id";
         await using (var conn = new SqlConnection(ConnectionString))
         await using (var cmd = new SqlCommand(command, conn))

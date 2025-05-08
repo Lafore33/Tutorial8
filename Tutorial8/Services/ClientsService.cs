@@ -18,6 +18,7 @@ public class ClientsService : IClientsService
     
     public async Task<int> AddClientAsync(ClientDTO client)
     {
+        // Inserts a new client into the Client table and retrieves the newly assigned identity value.
         var command = "INSERT INTO Client (FirstName, LastName, Email, Telephone, Pesel) VALUES (@FirstName, @LastName, @Email, @Telephone, @Pesel); SELECT SCOPE_IDENTITY();";
         await using var conn = new SqlConnection(ConnectionString);
         await using var cmd = new SqlCommand(command, conn);
@@ -35,6 +36,7 @@ public class ClientsService : IClientsService
     public async Task<bool> DoesRegistrationExist(int clientId, int tripId)
     {
         await using var conn = new SqlConnection(ConnectionString);
+        // Checks if a given client is already registered for a specific trip.
         await using var cmd = new SqlCommand("SELECT 1 FROM Client_Trip WHERE IdClient = @clientId AND IdTrip = @tripId", conn);
         cmd.Parameters.AddWithValue("@clientId", clientId);
         cmd.Parameters.AddWithValue("@tripId", tripId);
@@ -52,6 +54,7 @@ public class ClientsService : IClientsService
             throw new NotFoundException();
         }
         await using var conn = new SqlConnection(ConnectionString);
+        // Deletes the registration of a client for a specific trip from the Client_Trip table.
         await using var cmd = new SqlCommand("DELETE FROM Client_Trip WHERE IdClient = @clientId AND IdTrip = @tripId", conn);
         cmd.Parameters.AddWithValue("@clientId", clientId);
         cmd.Parameters.AddWithValue("@tripId", tripId);
@@ -74,6 +77,8 @@ public class ClientsService : IClientsService
             throw new TripFullException();
         }
         
+        // Registers a client to a trip by inserting a record into the Client_Trip table.
+        // Sets PaymentDate as NULL and RegisteredAt to the current date (formatted as yyyyMMdd).
         var command = "INSERT INTO Client_Trip (IdClient, IdTrip, RegisteredAt, PaymentDate) VALUES (@IdClient, @IdTrip, @RegisteredAt, NULL);SELECT SCOPE_IDENTITY();";
         await using var conn = new SqlConnection(ConnectionString);
         await using var cmd = new SqlCommand(command, conn);
@@ -95,6 +100,7 @@ public class ClientsService : IClientsService
     public async Task<bool> DoesClientExist(int id)
     {
         await using var conn = new SqlConnection(ConnectionString);
+        // Checks if a client exists in the Client table by their ID.
         await using var cmd = new SqlCommand("SELECT 1 FROM Client WHERE IdClient = @Id", conn);
         cmd.Parameters.AddWithValue("@Id", id);
 
